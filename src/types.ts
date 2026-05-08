@@ -4,7 +4,7 @@ export interface Product {
   description: string;
   price: number;
   originalPrice?: number;
-  category: 'Kitchen' | 'Decor' | 'Organizer' | 'Gadgets';
+  category: string; // Changed to string for flexibility with many organic categories
   images: string[];
   rating: number;
   reviewsCount: number;

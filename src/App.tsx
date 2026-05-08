@@ -7,9 +7,7 @@ import CustomDesign from './pages/CustomDesign';
 import Shop from './pages/store/Shop';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import Checkout from './pages/checkout/Checkout';
-
-// Placeholder components for routes
-const Categories = () => <div className="pt-32 min-h-screen text-center">Categories Page Coming Soon</div>;
+import Categories from './pages/Categories';
 
 export default function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);

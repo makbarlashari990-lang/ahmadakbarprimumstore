@@ -1,252 +1,200 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Star, Quote } from 'lucide-react';
-import { collection, query, where, getDocs, limit } from 'firebase/firestore';
+import { Star, Quote, ArrowRight, CheckCircle2, ShoppingBag, Leaf, Droplets, UtensilsCrossed } from 'lucide-react';
+import { collection, query, getDocs, limit } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../../lib/firebase';
 import { CATEGORIES, MOCK_PRODUCTS } from '../../constants';
 import { ProductCard, CategoryCard } from '../../components/ui/Cards';
-import { formatPrice } from '../../lib/utils';
+import { cn, formatPrice } from '../../lib/utils';
 import type { Product } from '../../types';
 
 export default function Home() {
-  const [timeLeft, setTimeLeft] = useState(86400); // 24 hours in seconds
   const [products, setProducts] = useState<Product[]>([]);
   const [bestSellers, setBestSellers] = useState<Product[]>([]);
-  const [flashSaleProducts, setFlashSaleProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     async function fetchHomeProducts() {
       try {
-        const q = query(collection(db, 'products'), limit(10));
+        const q = query(collection(db, 'products'), limit(8));
         const querySnapshot = await getDocs(q);
         const fetched = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
         
         if (fetched.length === 0) {
           setProducts(MOCK_PRODUCTS);
           setBestSellers(MOCK_PRODUCTS.filter(p => p.isBestSeller));
-          setFlashSaleProducts(MOCK_PRODUCTS.filter(p => p.isFlashSale));
         } else {
           setProducts(fetched);
           setBestSellers(fetched.filter(p => p.isBestSeller));
-          setFlashSaleProducts(fetched.filter(p => p.isFlashSale));
         }
       } catch (error) {
-        handleFirestoreError(error, OperationType.LIST, 'products');
+        console.error('Error fetching products:', error);
         setProducts(MOCK_PRODUCTS);
         setBestSellers(MOCK_PRODUCTS.filter(p => p.isBestSeller));
-        setFlashSaleProducts(MOCK_PRODUCTS.filter(p => p.isFlashSale));
       }
     }
     fetchHomeProducts();
   }, []);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(prev => Math.max(0, prev - 1));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const formatTime = (seconds: number) => {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    return { h: h.toString().padStart(2, '0'), m: m.toString().padStart(2, '0'), s: s.toString().padStart(2, '0') };
-  };
-
-  const { h, m, s } = formatTime(timeLeft);
-
   return (
-    <div className="w-full overflow-x-hidden">
+    <div className="flex flex-col bg-white overflow-x-hidden">
       {/* Hero Section */}
-      <section className="relative h-[80vh] flex items-center justify-center overflow-hidden bg-neutral-900">
-        <img 
-          src="https://images.unsplash.com/photo-1616489953149-75517454 application-quality/photo-1616489953149-755174549f8a?q=80&w=2000" 
-          alt="Hero" 
-          className="absolute inset-0 w-full h-full object-cover opacity-60"
-        />
-        <div className="absolute inset-0 bg-neutral-900/40" />
+      <section className="relative h-[85vh] flex items-center pt-32 lg:pt-0">
+        <div className="absolute inset-0">
+          <img 
+            src="https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=2000" 
+            alt="Organic Table" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-cream/30"></div>
+        </div>
         
-        <div className="relative z-10 text-center px-4">
-          <motion.span 
-            initial={{ opacity: 0, y: 20 }}
+        <div className="relative max-w-7xl mx-auto px-4 md:px-8 w-full z-10 flex flex-col items-center lg:items-start text-center lg:text-left">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-gold uppercase tracking-[0.4em] text-xs font-bold mb-6 block"
+            transition={{ duration: 0.8 }}
+            className="max-w-xl"
           >
-            Exclusive Collection 2026
-          </motion.span>
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-white text-5xl md:text-8xl font-display font-bold tracking-tighter uppercase mb-8 leading-[0.9]"
-          >
-            Premium Home <br /> Essentials
-          </motion.h1>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="flex flex-col md:flex-row items-center justify-center gap-4"
-          >
-            <a href="/shop" className="bg-gold text-white px-10 py-4 uppercase text-xs font-bold tracking-[0.2em] hover:bg-white hover:text-premium-black transition-all">
-              Shop Now
-            </a>
-            <a href="/custom-design" className="bg-transparent border border-white text-white px-10 py-4 uppercase text-xs font-bold tracking-[0.2em] hover:bg-white hover:text-premium-black transition-all">
-              Custom Designs
+            <h1 className="text-4xl md:text-7xl font-display font-black leading-[1.1] mb-8 text-brand-brown">
+              Foods that nourish as well as <span className="text-brand-yellow drop-shadow-sm">heal</span>
+            </h1>
+            <p className="text-lg md:text-xl text-brand-brown/70 mb-12 leading-relaxed font-bold max-w-md">
+              We bring you 100% Traditional Bilona Method Ghee and Pure Honey directly from nature.
+            </p>
+            <a href="/shop" className="daivik-button inline-flex items-center gap-3">
+              SHOP NOW <ArrowRight className="w-5 h-5" />
             </a>
           </motion.div>
         </div>
       </section>
 
-      {/* Featured Statistics */}
-      <section className="py-12 bg-white border-b border-neutral-100">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 grid grid-cols-2 lg:grid-cols-4 gap-8">
-          {[
-            { label: 'Original Products', value: '100%', sub: 'Guaranteed' },
-            { label: 'Happy Customers', value: '10K+', sub: 'Worldwide' },
-            { label: 'Delivery Time', value: '2-4', sub: 'Business Days' },
-            { label: 'Customer Support', value: '24/7', sub: 'WhatsApp' },
-          ].map((stat, i) => (
-            <div key={i} className="text-center group">
-              <div className="text-2xl md:text-3xl font-display font-bold text-premium-black mb-1 group-hover:text-gold transition-colors">{stat.value}</div>
-              <div className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">{stat.label}</div>
-              <div className="text-[9px] uppercase tracking-widest text-gold opacity-0 group-hover:opacity-100 transition-opacity">{stat.sub}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Categories Grid */}
-      <section className="py-20 max-w-7xl mx-auto px-4 md:px-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
-          <div>
-            <span className="text-gold uppercase tracking-[0.2em] text-[10px] font-bold mb-2 block">Departments</span>
-            <h2 className="text-3xl md:text-4xl font-display font-bold uppercase tracking-tight">Shop by Category</h2>
-          </div>
-          <a href="/categories" className="text-xs uppercase tracking-[0.2em] font-bold flex items-center gap-2 hover:text-gold transition-colors">
-            View All Categories <ArrowRight className="w-4 h-4" />
-          </a>
-        </div>
-        
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          {CATEGORIES.map(category => (
-            <CategoryCard key={category.id} category={category} />
-          ))}
-        </div>
-      </section>
-
-      {/* Flash Sale Banner */}
-      <section className="py-20 bg-neutral-900 border-y border-gold/10 overflow-hidden relative">
-        <div className="absolute top-0 right-0 w-1/3 h-full luxury-gradient opacity-20 skew-x-12 translate-x-1/2" />
-        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
-          <div className="text-center md:text-left">
-            <span className="bg-gold text-white text-[10px] font-bold px-3 py-1 uppercase tracking-widest mb-6 inline-block">
-              Limited Time Offer
-            </span>
-            <h2 className="text-white text-4xl md:text-6xl font-display font-bold uppercase tracking-tighter mb-4">
-              Premium Flash Sale
-            </h2>
-            <p className="text-neutral-400 mb-8 max-w-md">
-              Don't miss out on our exclusive selection of premium items at unbelievable prices. Only for a limited time.
-            </p>
-            
-            <div className="flex justify-center md:justify-start gap-4">
+      {/* Why Section */}
+      <section className="py-24 bg-cream/50">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+           <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
               {[
-                { label: 'Hours', value: h },
-                { label: 'Minutes', value: m },
-                { label: 'Seconds', value: s },
-              ].map((unit, i) => (
-                <div key={i} className="flex flex-col items-center">
-                  <div className="bg-white/5 border border-white/10 w-16 md:w-20 h-16 md:h-20 flex items-center justify-center text-white text-3xl font-display font-bold mb-2">
-                    {unit.value}
-                  </div>
-                  <span className="text-[10px] text-neutral-500 uppercase tracking-widest">{unit.label}</span>
+                { label: 'Farm Fresh', icon: <Leaf className="w-8 h-8" />, color: 'bg-green-100' },
+                { label: 'Pure Organic', icon: <Droplets className="w-8 h-8" />, color: 'bg-blue-100' },
+                { label: 'Village Sourced', icon: <UtensilsCrossed className="w-8 h-8" />, color: 'bg-orange-100' },
+                { label: 'Chemical Free', icon: <CheckCircle2 className="w-8 h-8" />, color: 'bg-yellow-100' },
+              ].map((item, i) => (
+                <div key={i} className="flex flex-col items-center text-center gap-6 group">
+                   <div className={cn("w-20 h-20 rounded-full flex items-center justify-center transition-transform group-hover:scale-110", item.color)}>
+                      {item.icon}
+                   </div>
+                   <h3 className="font-display font-black text-xs uppercase tracking-[0.2em] text-brand-brown">{item.label}</h3>
                 </div>
               ))}
+           </div>
+        </div>
+      </section>
+
+      {/* Holistic Wellness Section */}
+      <section className="py-32">
+         <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col lg:flex-row gap-20 items-center">
+            <div className="lg:w-1/2">
+                <img 
+                  src="https://images.unsplash.com/photo-1547462539-80bcc39a3f2d?q=80&w=1000" 
+                  alt="Natural Honey" 
+                  className="rounded-[3rem] shadow-2xl rotate-2 hover:rotate-0 transition-transform duration-700" 
+                />
             </div>
-          </div>
-          
-          <div className="w-full max-w-md grid grid-cols-2 gap-4">
-            {flashSaleProducts.slice(0, 2).map(product => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </div>
+            <div className="lg:w-1/2 space-y-10">
+               <h2 className="text-4xl md:text-6xl font-display font-black text-brand-brown leading-tight">
+                 Natural foods for your <span className="text-brand-yellow">holistic wellness</span>
+               </h2>
+               <p className="text-lg text-brand-brown/60 leading-relaxed font-medium">
+                 Daivik was founded with a dream of providing organic foods which are pure, ethical and local. We represent a movement for a healthier lifestyle, connecting you back to your roots.
+               </p>
+               <div className="grid grid-cols-2 gap-8 pt-6">
+                 {[
+                   { label: '1000+', sub: 'Families Served' },
+                   { label: '50+', sub: 'Organic Products' },
+                 ].map((stat, i) => (
+                   <div key={i} className="border-l-4 border-brand-yellow pl-6">
+                      <h4 className="text-3xl font-display font-black text-brand-brown">{stat.label}</h4>
+                      <p className="text-[10px] uppercase tracking-widest font-black text-brand-brown/40">{stat.sub}</p>
+                   </div>
+                 ))}
+               </div>
+               <a href="/shop" className="inline-flex items-center gap-2 text-brand-brown font-black uppercase text-xs tracking-widest border-b-2 border-brand-yellow pb-2 hover:text-brand-yellow transition-colors">
+                  Learn Our Story
+               </a>
+            </div>
+         </div>
       </section>
 
-      {/* Best Sellers Grid */}
-      <section className="py-20 max-w-7xl mx-auto px-4 md:px-8">
-        <div className="text-center mb-16">
-          <span className="text-gold uppercase tracking-[0.2em] text-[10px] font-bold mb-2 block">Curated Selection</span>
-          <h2 className="text-3xl md:text-5xl font-display font-bold uppercase tracking-tight">Best Sellers</h2>
-        </div>
-        
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-          {products.map(product => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-        
-        <div className="mt-16 text-center">
-          <button className="gold-border text-premium-black px-12 py-4 uppercase text-xs font-bold tracking-[0.2em] hover:bg-premium-black hover:text-white transition-all">
-            Load More Products
-          </button>
-        </div>
-      </section>
-
-      {/* Reviews Slider */}
-      <section className="py-20 bg-neutral-50 border-y border-neutral-100">
+      {/* Featured Collections */}
+      <section className="py-24 bg-cream/30">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-display font-bold uppercase tracking-tight mb-4">Customer Stories</h2>
-            <div className="flex items-center justify-center gap-1 text-gold">
-              <Star className="w-4 h-4 fill-current" />
-              <Star className="w-4 h-4 fill-current" />
-              <Star className="w-4 h-4 fill-current" />
-              <Star className="w-4 h-4 fill-current" />
-              <Star className="w-4 h-4 fill-current" />
-              <span className="text-premium-black text-sm font-bold ml-2">4.9/5 Average Rating</span>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="bg-white p-8 luxury-card relative group">
-                <Quote className="absolute top-6 right-6 w-10 h-10 text-neutral-100" />
-                <div className="flex gap-1 text-gold mb-6">
-                  {[...Array(5)].map((_, j) => <Star key={j} className="w-3 h-3 fill-current" />)}
-                </div>
-                <p className="text-neutral-600 text-sm italic leading-relaxed mb-6">
-                  "Absolutely love the quality of the products! The shipping was incredibly fast and the packaging was premium. Will definitely shop again from Ahmad Akbar Premium Store."
-                </p>
-                <div className="grid grid-cols-2 gap-2 mb-8">
-                   <img src={`https://picsum.photos/400/300?random=${i*10}`} alt="Review" className="w-full aspect-[4/3] object-cover" />
-                   <img src={`https://picsum.photos/400/300?random=${i*11}`} alt="Review" className="w-full aspect-[4/3] object-cover" />
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-neutral-100 overflow-hidden">
-                    <img src={`https://i.pravatar.cc/100?u=${i}`} alt="User" />
-                  </div>
-                  <div>
-                    <div className="font-bold text-sm">Zaryab Khan</div>
-                    <div className="text-[10px] text-gold uppercase font-bold tracking-widest">Verified Buyer</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+           <div className="text-center mb-20 space-y-4">
+              <span className="text-brand-yellow text-xs font-black uppercase tracking-[0.4em]">Our Collections</span>
+              <h2 className="text-4xl md:text-6xl font-display font-black text-brand-brown">Treasures of the Soil</h2>
+           </div>
+           
+           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
+              {CATEGORIES.map((category) => (
+                <CategoryCard key={category.id} category={category} />
+              ))}
+           </div>
         </div>
       </section>
 
-      {/* Trust Badges Bar */}
-      <section className="py-8 bg-premium-black border-t border-gold/20">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-wrap justify-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Jazz_Cash_Logo.png" alt="JazzCash" className="h-4 md:h-6 object-contain" />
-          <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/Easypaisa_logo.png" alt="EasyPaisa" className="h-4 md:h-6 object-contain" />
-          <div className="text-white text-[10px] font-bold tracking-[0.3em] uppercase">100% Original Products</div>
-          <div className="text-white text-[10px] font-bold tracking-[0.3em] uppercase">Free Returns</div>
+      {/* Featured Products */}
+      <section className="py-32">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+           <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
+              <div>
+                 <span className="text-brand-yellow text-xs font-black uppercase tracking-[0.4em] mb-4 block">Shop Khalis</span>
+                 <h2 className="text-4xl md:text-6xl font-display font-black text-brand-brown">Customer Favorites</h2>
+              </div>
+              <a href="/shop" className="daivik-button">View All Products</a>
+           </div>
+
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {bestSellers.slice(0, 4).map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+           </div>
         </div>
+      </section>
+
+      {/* Testimonials Banner */}
+      <section className="py-32 bg-brand-brown text-white relative overflow-hidden">
+         <div className="absolute top-0 right-0 p-20 opacity-5">
+            <Quote className="w-96 h-96" />
+         </div>
+         <div className="max-w-5xl mx-auto px-4 md:px-8 text-center relative z-10">
+            <Quote className="w-16 h-16 text-brand-yellow mx-auto mb-12 opacity-50" />
+            <p className="text-2xl md:text-4xl font-display font-medium leading-relaxed mb-16 italic">
+              "Lashari Organic has changed how we look at food. Their Desi Ghee is just like what my grandmother used to make. Pure, aromatic and truly khalis."
+            </p>
+            <div className="flex flex-col items-center">
+               <div className="w-20 h-20 rounded-full bg-brand-yellow mb-4 border-4 border-white/10 overflow-hidden">
+                  <img src="https://i.pravatar.cc/100?u=arsalan" className="w-full h-full object-cover" />
+               </div>
+               <h4 className="font-display font-black uppercase tracking-tighter text-xl text-brand-yellow">Arsalan Lashari</h4>
+               <p className="text-[10px] uppercase tracking-widest font-black opacity-40">Verified Customer</p>
+            </div>
+         </div>
+      </section>
+
+      {/* Newsletter */}
+      <section className="py-32">
+         <div className="max-w-3xl mx-auto px-4 text-center space-y-8">
+            <h2 className="text-4xl font-display font-black text-brand-brown">Join the Organic Family</h2>
+            <p className="text-brand-brown/60 font-bold text-sm uppercase tracking-widest">Subscribe to receive healthy tips and farm updates.</p>
+            <div className="flex p-2 bg-cream rounded-full border border-brand-yellow/20 shadow-xl">
+               <input 
+                 type="email" 
+                 placeholder="Enter your email" 
+                 className="flex-1 px-8 py-3 bg-transparent border-none outline-none font-bold text-sm" 
+               />
+               <button className="bg-brand-yellow text-dark px-10 py-3 rounded-full font-black uppercase text-xs tracking-widest hover:scale-105 active:scale-95 transition-all">
+                  Join Now
+               </button>
+            </div>
+         </div>
       </section>
     </div>
   );
